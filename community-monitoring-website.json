@@ -1,0 +1,59 @@
+{
+    "typeName": "Community::Monitoring::Website",
+    "description": "During the creation of a simple website you may want to provision a third-party website monitor, which has a public API.",
+    "sourceUrl": "https://github.com/eduardomourar/example-aws-resource-type.git",
+    "definitions": {},
+    "properties": {
+        "Name": {
+            "description": "The name of your website monitor.",
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 50
+        },
+        "WebsiteUrl": {
+            "description": "The URL of your website that will be monitored.",
+            "type": "string",
+            "pattern": "^https?://[^\\s/$.?#].[^\\s]*$"
+        },
+        "PingInterval": {
+            "description": "Ping interval to monitor in minutes",
+            "type": "number",
+            "default": 5,
+            "minimum": 1
+        },
+        "MonitoringPage": {
+            "description": "The status page for your website monitoring.",
+            "type": "string"
+        }
+    },
+    "additionalProperties": false,
+    "required": [
+        "Name",
+        "WebsiteUrl"
+    ],
+    "createOnlyProperties": [
+        "/properties/Name"
+    ],
+    "readOnlyProperties": [
+        "/properties/Name",
+        "/properties/WebsiteUrl",
+        "/properties/MonitoringPage"
+    ],
+    "primaryIdentifier": [
+        "/properties/Name"
+    ],
+    "handlers": {
+        "create": {
+            "permissions": []
+        },
+        "read": {
+            "permissions": []
+        },
+        "update": {
+            "permissions": []
+        },
+        "delete": {
+            "permissions": []
+        }
+    }
+}

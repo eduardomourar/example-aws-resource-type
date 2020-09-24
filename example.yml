@@ -1,0 +1,13 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Resources:
+  MyWebsiteMonitor:
+    Type: Community::Monitoring::Website
+    Properties:
+      Name: MyWebsiteMonitor
+      WebsiteUrl: 'http://amazonaws.com'
+      PingInterval: 5
+
+Outputs:
+  MonitoringPage:
+    Value: !GetAtt MyWebsiteMonitor.MonitoringPage
