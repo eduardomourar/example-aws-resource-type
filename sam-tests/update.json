@@ -1,0 +1,24 @@
+{
+    "credentials": {
+        "accessKeyId": "",
+        "secretAccessKey": "",
+        "sessionToken": ""
+    },
+    "action": "UPDATE",
+    "request": {
+        "clientRequestToken": "4b90a7e4-b790-456b-a937-0cfdfa211dfe",
+        "desiredResourceState": {
+            "Name": "MyWebsiteMonitor",
+            "WebsiteUrl": "http://amazonaws.com",
+            "PingInterval": 10
+        },
+        "previousResourceState": {
+            "Name": "MyWebsiteMonitor",
+            "WebsiteUrl": "http://amazonaws.com"
+        },
+        "logicalResourceIdentifier": "MyResource"
+    },
+    "callbackContext": null,
+    "awsAccountId": "123456789012",
+    "region": "eu-central-1"
+}
