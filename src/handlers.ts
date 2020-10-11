@@ -4,6 +4,7 @@ import {
     exceptions,
     handlerEvent,
     HandlerErrorCode,
+    LoggerProxy,
     OperationStatus,
     Optional,
     ProgressEvent,
@@ -11,9 +12,6 @@ import {
     SessionProxy
 } from 'cfn-rpdk';
 import { ResourceModel } from './models';
-
-// Use this logger to forward messages to CloudWatch Logs.
-const LOGGER = console;
 
 interface CallbackContext extends Record<string, any> {};
 
@@ -35,8 +33,9 @@ class Resource extends BaseResource<ResourceModel> {
         session: Optional<SessionProxy>,
         request: ResourceHandlerRequest<ResourceModel>,
         callbackContext: CallbackContext,
+        logger: LoggerProxy
     ): Promise<ProgressEvent> {
-        LOGGER.info('CREATE request', request);
+        logger.log('CREATE request', request);
         const model: ResourceModel = new ResourceModel(request.desiredResourceState);
         const progress = ProgressEvent.progress<ProgressEvent<ResourceModel, CallbackContext>>(model);
 
@@ -50,11 +49,10 @@ class Resource extends BaseResource<ResourceModel> {
             // Setting Status to success will signal to CloudFormation that the operation is complete
             progress.status = OperationStatus.Success;
         } catch(err) {
-            LOGGER.log(err);
+            logger.log(err);
             throw new exceptions.InternalFailure(err.message);
         }
-
-        LOGGER.info('CREATE progress', progress);
+        logger.log('CREATE progress', progress);
         return progress;
     }
 
@@ -72,8 +70,9 @@ class Resource extends BaseResource<ResourceModel> {
         session: Optional<SessionProxy>,
         request: ResourceHandlerRequest<ResourceModel>,
         callbackContext: CallbackContext,
+        logger: LoggerProxy
     ): Promise<ProgressEvent> {
-        LOGGER.info('UPDATE request', request);
+        logger.log('UPDATE request', request);
         const model: ResourceModel = new ResourceModel(request.desiredResourceState);
         const progress = ProgressEvent.progress<ProgressEvent<ResourceModel, CallbackContext>>(model);
         try {
@@ -86,10 +85,10 @@ class Resource extends BaseResource<ResourceModel> {
             // Setting Status to success will signal to CloudFormation that the operation is complete
             progress.status = OperationStatus.Success;
         } catch(err) {
-            LOGGER.log(err);
+            logger.log(err);
             return ProgressEvent.failed(HandlerErrorCode.InternalFailure, err.message);
         }
-        LOGGER.info('UPDATE progress', progress);
+        logger.log('UPDATE progress', progress);
         return progress;
     }
 
@@ -108,8 +107,9 @@ class Resource extends BaseResource<ResourceModel> {
         session: Optional<SessionProxy>,
         request: ResourceHandlerRequest<ResourceModel>,
         callbackContext: CallbackContext,
+        logger: LoggerProxy
     ): Promise<ProgressEvent> {
-        LOGGER.info('DELETE request', request);
+        logger.log('DELETE request', request);
         const model: ResourceModel = new ResourceModel(request.desiredResourceState);
         const progress = ProgressEvent.progress<ProgressEvent<ResourceModel, CallbackContext>>();
         
@@ -117,7 +117,7 @@ class Resource extends BaseResource<ResourceModel> {
         model.monitoringPage = MONITORING_PAGE;
 
         progress.status = OperationStatus.Success;
-        LOGGER.info('DELETE progress', progress);
+        logger.log('DELETE progress', progress);
         return progress;
     }
 
@@ -135,8 +135,9 @@ class Resource extends BaseResource<ResourceModel> {
         session: Optional<SessionProxy>,
         request: ResourceHandlerRequest<ResourceModel>,
         callbackContext: CallbackContext,
+        logger: LoggerProxy
     ): Promise<ProgressEvent> {
-        LOGGER.info('READ request', request);
+        logger.log('READ request', request);
         const model: ResourceModel = new ResourceModel(request.desiredResourceState);
         
         // Here you would call the monitoring public API
@@ -145,7 +146,7 @@ class Resource extends BaseResource<ResourceModel> {
         model.monitoringPage = MONITORING_PAGE;
 
         const progress = ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(model);
-        LOGGER.info('READ progress', progress);
+        logger.log('READ progress', progress);
         return progress;
     }
 }

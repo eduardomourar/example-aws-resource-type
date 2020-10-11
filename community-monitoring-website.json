@@ -35,7 +35,6 @@
         "/properties/Name"
     ],
     "readOnlyProperties": [
-        "/properties/Name",
         "/properties/WebsiteUrl",
         "/properties/MonitoringPage"
     ],
