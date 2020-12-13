@@ -1,5 +1,5 @@
 {
-    "typeName": "Community::Monitoring::Website",
+    "typeName": "Example::Monitoring::Website",
     "language": "typescript",
     "runtime": "nodejs12.x",
     "entrypoint": "dist/handlers.entrypoint",

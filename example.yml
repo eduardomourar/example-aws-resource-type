@@ -1,11 +1,16 @@
 AWSTemplateFormatVersion: '2010-09-09'
 
+Parameters:
+  websiteUrl:
+    Type: String
+    Default: 'https://aws.amazon.com'
+
 Resources:
   MyWebsiteMonitor:
-    Type: Community::Monitoring::Website
+    Type: Example::Monitoring::Website
     Properties:
-      Name: MyWebsiteMonitor
-      WebsiteUrl: 'http://amazonaws.com'
+      Name: 'MyWebsiteMonitor'
+      WebsiteUrl: !Ref websiteUrl
       PingInterval: 5
 
 Outputs:

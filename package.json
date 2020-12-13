@@ -1,7 +1,7 @@
 {
-    "name": "community-monitoring-website",
+    "name": "example-monitoring-website",
     "version": "0.1.0",
-    "description": "AWS custom resource provider named Community::Monitoring::Website.",
+    "description": "AWS custom resource provider named Example::Monitoring::Website.",
     "private": true,
     "main": "dist/handlers.js",
     "files": [
@@ -12,13 +12,18 @@
         "prepack": "npm run build",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
+    "engines": {
+        "node": ">=12.0.0",
+        "npm": ">=6.9.0"
+    },
     "dependencies": {
-        "cfn-rpdk": "npm:@org-formation/cfn-rpdk@^0.4.0",
+        "cfn-rpdk": "https://github.com/eduardomourar/cloudformation-cli-typescript-plugin/releases/download/v0.5.0/cfn-rpdk-0.5.0.tgz",
         "class-transformer": "^0.3.1"
     },
     "devDependencies": {
         "@types/node": "^12.0.0",
-        "typescript": "^3.8.3"
+        "typescript": "^4.1.2",
+        "aws-sdk": "^2.656.0"
     },
     "optionalDependencies": {
         "aws-sdk": "^2.656.0"

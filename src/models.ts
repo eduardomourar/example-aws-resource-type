@@ -6,7 +6,7 @@ export class ResourceModel extends BaseModel {
     ['constructor']: typeof ResourceModel;
 
     @Exclude()
-    public static readonly TYPE_NAME: string = 'Community::Monitoring::Website';
+    public static readonly TYPE_NAME: string = 'Example::Monitoring::Website';
 
     @Exclude()
     protected readonly IDENTIFIER_KEY_NAME: string = '/properties/Name';

@@ -11,11 +11,12 @@ import {
     ResourceHandlerRequest,
     SessionProxy
 } from 'cfn-rpdk';
+
 import { ResourceModel } from './models';
 
 interface CallbackContext extends Record<string, any> {};
 
-const MONITORING_PAGE = 'http://www.example.com/status';
+const MONITORING_PAGE = 'https://status.aws.amazon.com';
 
 class Resource extends BaseResource<ResourceModel> {
 
@@ -35,8 +36,8 @@ class Resource extends BaseResource<ResourceModel> {
         callbackContext: CallbackContext,
         logger: LoggerProxy
     ): Promise<ProgressEvent> {
-        logger.log('CREATE request', request);
-        const model: ResourceModel = new ResourceModel(request.desiredResourceState);
+        logger.log('request', request);
+        const model = new ResourceModel(request.desiredResourceState);
         const progress = ProgressEvent.progress<ProgressEvent<ResourceModel, CallbackContext>>(model);
 
         try {
@@ -52,7 +53,7 @@ class Resource extends BaseResource<ResourceModel> {
             logger.log(err);
             throw new exceptions.InternalFailure(err.message);
         }
-        logger.log('CREATE progress', progress);
+        logger.log('progress', progress);
         return progress;
     }
 
@@ -72,8 +73,8 @@ class Resource extends BaseResource<ResourceModel> {
         callbackContext: CallbackContext,
         logger: LoggerProxy
     ): Promise<ProgressEvent> {
-        logger.log('UPDATE request', request);
-        const model: ResourceModel = new ResourceModel(request.desiredResourceState);
+        logger.log('request', request);
+        const model = new ResourceModel(request.desiredResourceState);
         const progress = ProgressEvent.progress<ProgressEvent<ResourceModel, CallbackContext>>(model);
         try {
             if (!model.pingInterval) {
@@ -88,7 +89,7 @@ class Resource extends BaseResource<ResourceModel> {
             logger.log(err);
             return ProgressEvent.failed(HandlerErrorCode.InternalFailure, err.message);
         }
-        logger.log('UPDATE progress', progress);
+        logger.log('progress', progress);
         return progress;
     }
 
@@ -109,15 +110,15 @@ class Resource extends BaseResource<ResourceModel> {
         callbackContext: CallbackContext,
         logger: LoggerProxy
     ): Promise<ProgressEvent> {
-        logger.log('DELETE request', request);
-        const model: ResourceModel = new ResourceModel(request.desiredResourceState);
+        logger.log('request', request);
+        const model = new ResourceModel(request.desiredResourceState);
         const progress = ProgressEvent.progress<ProgressEvent<ResourceModel, CallbackContext>>();
         
         // Here you would call the monitoring public API
         model.monitoringPage = MONITORING_PAGE;
 
         progress.status = OperationStatus.Success;
-        logger.log('DELETE progress', progress);
+        logger.log('progress', progress);
         return progress;
     }
 
@@ -137,21 +138,21 @@ class Resource extends BaseResource<ResourceModel> {
         callbackContext: CallbackContext,
         logger: LoggerProxy
     ): Promise<ProgressEvent> {
-        logger.log('READ request', request);
-        const model: ResourceModel = new ResourceModel(request.desiredResourceState);
-        
+        logger.log('request', request);
+        const model = new ResourceModel(request.desiredResourceState);
+
         // Here you would call the monitoring public API
-        model.websiteUrl = 'http://amazonaws.com';
+        model.websiteUrl = 'https://aws.amazon.com';
         model.pingInterval = 5;
         model.monitoringPage = MONITORING_PAGE;
 
         const progress = ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(model);
-        logger.log('READ progress', progress);
+        logger.log('progress', progress);
         return progress;
     }
 }
 
-const resource = new Resource(ResourceModel.TYPE_NAME, ResourceModel);
+export const resource = new Resource(ResourceModel.TYPE_NAME, ResourceModel);
 
 export const entrypoint = resource.entrypoint;
 
