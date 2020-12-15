@@ -37,14 +37,23 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent> {
         logger.log('request', request);
+        
+        // It is important that we create a new instance of the model,
+        // because the desired state is immutable.
         const model = new ResourceModel(request.desiredResourceState);
         const progress = ProgressEvent.progress<ProgressEvent<ResourceModel, CallbackContext>>(model);
+
+        // MonitoringPage is a read only property, which means that
+        // it cannot be set during creation or update operations.
+        if (model.monitoringPage) {
+            throw new exceptions.InvalidRequest('Read only property [MonitoringPage] cannot be provided by the user.');
+        }
 
         try {
             if (!model.pingInterval) {
                 model.pingInterval = 5;
             }
-            // Here you would call the monitoring public API
+            // Here you would call the monitoring public API to create the resource
             model.monitoringPage = MONITORING_PAGE;
 
             // Setting Status to success will signal to CloudFormation that the operation is complete
@@ -76,14 +85,26 @@ class Resource extends BaseResource<ResourceModel> {
         logger.log('request', request);
         const model = new ResourceModel(request.desiredResourceState);
         const progress = ProgressEvent.progress<ProgressEvent<ResourceModel, CallbackContext>>(model);
+        const { name, monitoringPage } = request.previousResourceState;
+
+        if (!model.name) {
+            throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
+        } else if (model.name !== name) {
+            // The Name is a create only property, which means that it cannot be updated.
+            logger.log(this.typeName, `[NEW ${model.name}] [${request.logicalResourceIdentifier}] does not match identifier from saved resource [OLD ${name}].`);
+            throw new exceptions.NotUpdatable('Create only property [Name] cannot be updated.');
+        } else if (model.monitoringPage !== monitoringPage) {
+            logger.log(this.typeName, `[NEW ${model.monitoringPage}] [${request.logicalResourceIdentifier}] does not match identifier from saved resource [OLD ${monitoringPage}].`);
+            throw new exceptions.NotUpdatable('Read only property [MonitoringPage] cannot be updated.');
+        }
+
         try {
             if (!model.pingInterval) {
                 model.pingInterval = 5;
             }
-            // Here you would call the monitoring public API
+            // Here you would call the monitoring public API to update the resource
             model.monitoringPage = MONITORING_PAGE;
 
-            // Setting Status to success will signal to CloudFormation that the operation is complete
             progress.status = OperationStatus.Success;
         } catch(err) {
             logger.log(err);
@@ -113,9 +134,13 @@ class Resource extends BaseResource<ResourceModel> {
         logger.log('request', request);
         const model = new ResourceModel(request.desiredResourceState);
         const progress = ProgressEvent.progress<ProgressEvent<ResourceModel, CallbackContext>>();
-        
-        // Here you would call the monitoring public API
-        model.monitoringPage = MONITORING_PAGE;
+
+        // The Name property, being the primary identifier, cannot be left empty.
+        if (!model.name) {
+            throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
+        }
+
+        // Here you would call the monitoring public API to delete the resource
 
         progress.status = OperationStatus.Success;
         logger.log('progress', progress);
@@ -141,7 +166,11 @@ class Resource extends BaseResource<ResourceModel> {
         logger.log('request', request);
         const model = new ResourceModel(request.desiredResourceState);
 
-        // Here you would call the monitoring public API
+        if (!model.name) {
+            throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
+        }
+
+        // Here you would call the monitoring public API to describe the resource
         model.websiteUrl = 'https://aws.amazon.com';
         model.pingInterval = 5;
         model.monitoringPage = MONITORING_PAGE;

@@ -15,5 +15,5 @@
     },
     "callbackContext": null,
     "awsAccountId": "123456789012",
-    "region": "eu-central-1"
+    "region": "us-west-2"
 }
