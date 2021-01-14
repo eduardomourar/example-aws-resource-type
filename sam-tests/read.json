@@ -8,12 +8,12 @@
     "request": {
         "clientRequestToken": "4b90a7e4-b790-456b-a937-0cfdfa211dfe",
         "desiredResourceState": {
-            "Name": "MyWebsiteMonitor"
+            "Id": "YOUR_RESOURCE_ID_HERE"
         },
         "previousResourceState": null,
         "logicalResourceIdentifier": "MyResource"
     },
     "callbackContext": null,
     "awsAccountId": "123456789012",
-    "region": "us-west-2"
+    "region": "eu-central-1"
 }

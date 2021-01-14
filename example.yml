@@ -1,6 +1,9 @@
 AWSTemplateFormatVersion: '2010-09-09'
 
 Parameters:
+  apiKey:
+    Type: String
+
   websiteUrl:
     Type: String
     Default: 'https://aws.amazon.com'
@@ -9,10 +12,11 @@ Resources:
   MyWebsiteMonitor:
     Type: Example::Monitoring::Website
     Properties:
+      ApiKey: !Ref apiKey
       Name: 'MyWebsiteMonitor'
-      WebsiteUrl: !Ref websiteUrl
-      PingInterval: 5
+      Uri: !Ref websiteUrl
+      Frequency: 5
 
 Outputs:
-  MonitoringPage:
-    Value: !GetAtt MyWebsiteMonitor.MonitoringPage
+  MonitoringKind:
+    Value: !GetAtt MyWebsiteMonitor.Kind
