@@ -17,7 +17,12 @@ import fetch, { Response } from 'node-fetch';
 
 import { ResourceModel } from './models';
 
-interface CallbackContext extends Record<string, any> {};
+interface CallbackContext extends Record<string, any> {}
+
+enum ApiEndpoints {
+    US = 'https://synthetics.newrelic.com/synthetics/api',
+    EU = 'https://synthetics.eu.newrelic.com/synthetics/api',
+}
 
 interface Monitor {
     readonly id?: string;
@@ -28,10 +33,15 @@ interface Monitor {
     readonly status?: string;
     readonly locations?: string[];
     readonly slaThreshold?: number;
-};
+}
 
+/**
+ * Resource to be used in AWS CloudFormation to create and manage
+ * New Relic's synthetic monitors of type "ping".
+ * See documentation {@link https://docs.newrelic.com/docs/apis/synthetics-rest-api/monitor-examples/manage-synthetics-monitors-rest-api}.
+ */
 class Resource extends BaseResource<ResourceModel> {
-    static readonly API_ENDPOINT = 'https://synthetics.eu.newrelic.com/synthetics/api';
+    static readonly API_ENDPOINT = ApiEndpoints.EU;
     static readonly DEFAULT_HEADERS = {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
@@ -132,6 +142,9 @@ class Resource extends BaseResource<ResourceModel> {
             progress.status = OperationStatus.Success;
         } catch(err) {
             logger.log(err);
+            if (err instanceof exceptions.BaseHandlerException) {
+                throw err;
+            }
             throw new exceptions.InternalFailure(err.message);
         }
         logger.log('progress', progress);
@@ -169,32 +182,40 @@ class Resource extends BaseResource<ResourceModel> {
             throw new exceptions.NotUpdatable('Create only property [Name] cannot be updated.');
         }
 
-        if (!model.frequency) {
-            model.frequency = Integer(5);
+        try {
+            if (!model.frequency) {
+                model.frequency = Integer(5);
+            }
+            model.kind = Resource.DEFAULT_MONITOR_KIND;
+            model.status = Resource.DEFAULT_MONITOR_STATUS;
+            model.locations = Resource.DEFAULT_MONITOR_LOCATIONS;
+            model.slaThreshold = Resource.DEFAULT_MONITOR_SLA_THRESHOLD;
+            const apiKey = model.apiKey || this.apiKey;
+            const response: Response = await fetch(`${Resource.API_ENDPOINT}/v3/monitors/${id}`, {
+                method: 'PUT',
+                headers: { ...Resource.DEFAULT_HEADERS, 'Api-Key': apiKey },
+                body: JSON.stringify({
+                    name,
+                    uri: model.uri,
+                    type: model.kind,
+                    frequency: model.frequency,
+                    status: model.status,
+                    locations: model.locations,
+                    slaThreshold: model.slaThreshold
+                } as Monitor)
+            });
+            await this.checkResponse(response, logger, id);
+            // model.apiKey = null;
+            const progress = ProgressEvent.success<ProgressEvent<ResourceModel>>(model);
+            logger.log('progress', progress);
+            return progress;
+        } catch(err) {
+            logger.log(err);
+            if (err instanceof exceptions.BaseHandlerException) {
+                throw err;
+            }
+            return ProgressEvent.failed<ProgressEvent<ResourceModel>>(HandlerErrorCode.InternalFailure, err.message);
         }
-        model.kind = Resource.DEFAULT_MONITOR_KIND;
-        model.status = Resource.DEFAULT_MONITOR_STATUS;
-        model.locations = Resource.DEFAULT_MONITOR_LOCATIONS;
-        model.slaThreshold = Resource.DEFAULT_MONITOR_SLA_THRESHOLD;
-        const apiKey = model.apiKey || this.apiKey;
-        const response: Response = await fetch(`${Resource.API_ENDPOINT}/v3/monitors/${id}`, {
-            method: 'PUT',
-            headers: { ...Resource.DEFAULT_HEADERS, 'Api-Key': apiKey },
-            body: JSON.stringify({
-                name,
-                uri: model.uri,
-                type: model.kind,
-                frequency: model.frequency,
-                status: model.status,
-                locations: model.locations,
-                slaThreshold: model.slaThreshold
-            } as Monitor)
-        });
-        await this.checkResponse(response, logger, id);
-        // model.apiKey = null;
-        const progress = ProgressEvent.success<ProgressEvent<ResourceModel>>(model);
-        logger.log('progress', progress);
-        return progress;
     }
 
     /**
@@ -254,19 +275,14 @@ class Resource extends BaseResource<ResourceModel> {
             throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
         }
 
-        try {
-            model.kind = Resource.DEFAULT_MONITOR_KIND;
-            model.status = Resource.DEFAULT_MONITOR_STATUS;
-            model.locations = Resource.DEFAULT_MONITOR_LOCATIONS;
-            model.slaThreshold = Resource.DEFAULT_MONITOR_SLA_THRESHOLD;
+        model.kind = Resource.DEFAULT_MONITOR_KIND;
+        model.status = Resource.DEFAULT_MONITOR_STATUS;
+        model.locations = Resource.DEFAULT_MONITOR_LOCATIONS;
+        model.slaThreshold = Resource.DEFAULT_MONITOR_SLA_THRESHOLD;
 
-            const progress = ProgressEvent.success<ProgressEvent<ResourceModel>>(model);
-            logger.log('progress', progress);
-            return progress;
-        } catch(err) {
-            logger.log(err);
-            return ProgressEvent.failed<ProgressEvent<ResourceModel>>(HandlerErrorCode.InternalFailure, err.message);
-        }
+        const progress = ProgressEvent.success<ProgressEvent<ResourceModel>>(model);
+        logger.log('progress', progress);
+        return progress;
     }
 }
 
