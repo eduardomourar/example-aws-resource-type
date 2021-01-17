@@ -31,6 +31,15 @@ export class ResourceModel extends BaseModel {
         }
     )
     apiKey?: Optional<string>;
+    @Expose({ name: 'EndpointRegion' })
+    @Transform(
+        (value: any, obj: any) =>
+            transformValue(String, 'endpointRegion', value, obj, []),
+        {
+            toClassOnly: true,
+        }
+    )
+    endpointRegion?: Optional<string>;
     @Expose({ name: 'Kind' })
     @Transform(
         (value: any, obj: any) =>

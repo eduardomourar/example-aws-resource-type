@@ -13,6 +13,7 @@ To declare this entity in your AWS CloudFormation template, use the following sy
     "Type" : "Example::Monitoring::Website",
     "Properties" : {
         "<a href="#apikey" title="ApiKey">ApiKey</a>" : <i>String</i>,
+        "<a href="#endpointregion" title="EndpointRegion">EndpointRegion</a>" : <i>String</i>,
         "<a href="#name" title="Name">Name</a>" : <i>String</i>,
         "<a href="#uri" title="Uri">Uri</a>" : <i>String</i>,
         "<a href="#frequency" title="Frequency">Frequency</a>" : <i>Integer</i>,
@@ -26,6 +27,7 @@ To declare this entity in your AWS CloudFormation template, use the following sy
 Type: Example::Monitoring::Website
 Properties:
     <a href="#apikey" title="ApiKey">ApiKey</a>: <i>String</i>
+    <a href="#endpointregion" title="EndpointRegion">EndpointRegion</a>: <i>String</i>
     <a href="#name" title="Name">Name</a>: <i>String</i>
     <a href="#uri" title="Uri">Uri</a>: <i>String</i>
     <a href="#frequency" title="Frequency">Frequency</a>: <i>Integer</i>
@@ -42,6 +44,18 @@ _Required_: Yes
 _Type_: String
 
 _Minimum_: <code>1</code>
+
+_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
+
+#### EndpointRegion
+
+The region from the account, which will influence the endpoint to be called: https://synthetics.newrelic.com/synthetics/api (US - default) or https://synthetics.eu.newrelic.com/synthetics/api (EU).
+
+_Required_: No
+
+_Type_: String
+
+_Allowed Values_: <code>US</code> | <code>EU</code>
 
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
 
@@ -73,7 +87,7 @@ _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormati
 
 #### Frequency
 
-The frequency interval for the monitoring check (in minutes).
+The frequency interval for the monitoring check (in minutes). Default is 5 minutes.
 
 _Required_: No
 
@@ -101,17 +115,17 @@ The ID of the website monitor.
 
 #### Kind
 
-The type of the website monitor.
+The type of the website monitor. Default is SIMPLE (ping).
 
 #### Locations
 
-The locations from where your website will be checked.
+The locations from where your website will be checked. Default to AWS_EU_CENTRAL_1 and AWS_US_WEST_1.
 
 #### Status
 
-The status of your website monitoring.
+The status of your website monitoring. Default is MUTED.
 
 #### SlaThreshold
 
-The SLA threshold for the monitoring check (in seconds).
+The SLA threshold for the monitoring check (in seconds). Default is 7 seconds.
 

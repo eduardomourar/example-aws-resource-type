@@ -15,8 +15,17 @@
             "type": "string",
             "minLength": 1
         },
+        "EndpointRegion": {
+            "description": "The region from the account, which will influence the endpoint to be called: https://synthetics.newrelic.com/synthetics/api (US - default) or https://synthetics.eu.newrelic.com/synthetics/api (EU).",
+            "type": "string",
+            "default": "US",
+            "enum": [
+                "US",
+                "EU"
+            ]
+        },
         "Kind": {
-            "description": "The type of the website monitor.",
+            "description": "The type of the website monitor. Default is SIMPLE (ping).",
             "type": "string",
             "default": "SIMPLE",
             "enum": [
@@ -38,7 +47,7 @@
             "pattern": "^https?://[^\\s/$.?#].[^\\s]*$"
         },
         "Frequency": {
-            "description": "The frequency interval for the monitoring check (in minutes).",
+            "description": "The frequency interval for the monitoring check (in minutes). Default is 5 minutes.",
             "type": "integer",
             "default": 5,
             "enum": [
@@ -54,7 +63,7 @@
             ]
         },
         "Locations": {
-            "description": "The locations from where your website will be checked.",
+            "description": "The locations from where your website will be checked. Default to AWS_EU_CENTRAL_1 and AWS_US_WEST_1.",
             "type": "array",
             "items": {
                 "type": "string"
@@ -62,7 +71,7 @@
             "minItems": 1
         },
         "Status": {
-            "description": "The status of your website monitoring.",
+            "description": "The status of your website monitoring. Default is MUTED.",
             "type": "string",
             "default": "MUTED",
             "enum": [
@@ -72,7 +81,7 @@
             ]
         },
         "SlaThreshold": {
-            "description": "The SLA threshold for the monitoring check (in seconds).",
+            "description": "The SLA threshold for the monitoring check (in seconds). Default is 7 seconds.",
             "type": "number",
             "default": 7.0
         }

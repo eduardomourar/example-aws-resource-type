@@ -24,6 +24,8 @@ enum ApiEndpoints {
     EU = 'https://synthetics.eu.newrelic.com/synthetics/api',
 }
 
+type EndpointRegions = keyof typeof ApiEndpoints;
+
 interface Monitor {
     readonly id?: string;
     readonly name?: string;
@@ -37,11 +39,10 @@ interface Monitor {
 
 /**
  * Resource to be used in AWS CloudFormation to create and manage
- * New Relic's synthetic monitors of type "ping".
+ * New Relic's synthetic monitors of type "ping" (SIMPLE).
  * See documentation {@link https://docs.newrelic.com/docs/apis/synthetics-rest-api/monitor-examples/manage-synthetics-monitors-rest-api}.
  */
 class Resource extends BaseResource<ResourceModel> {
-    static readonly API_ENDPOINT = ApiEndpoints.EU;
     static readonly DEFAULT_HEADERS = {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
@@ -53,8 +54,6 @@ class Resource extends BaseResource<ResourceModel> {
         'AWS_US_WEST_1'
     ];
     static readonly DEFAULT_MONITOR_SLA_THRESHOLD = 7.0;
-
-    private apiKey: string = null;
 
     private async checkResponse(response: Response, logger: LoggerProxy, uid?: string): Promise<any> {
         if (response.status === 400) {
@@ -80,6 +79,7 @@ class Resource extends BaseResource<ResourceModel> {
      * @param request The request object for the provisioning request passed to the implementor
      * @param callbackContext Custom context object to allow the passing through of additional
      * state or metadata between subsequent retries
+     * @param logger Logger to proxy requests to default publishers
      */
     @handlerEvent(Action.Create)
     public async create(
@@ -102,16 +102,21 @@ class Resource extends BaseResource<ResourceModel> {
         }
 
         try {
-            if (!model.frequency) {
-                model.frequency = Integer(5);
-            }
+            // Set or fallback to default values
+            model.frequency = model.frequency || Integer(5);
+            model.endpointRegion = model.endpointRegion || 'US';
             model.kind = Resource.DEFAULT_MONITOR_KIND;
             model.status = Resource.DEFAULT_MONITOR_STATUS;
             model.locations = Resource.DEFAULT_MONITOR_LOCATIONS;
             model.slaThreshold = Resource.DEFAULT_MONITOR_SLA_THRESHOLD;
-            const createResponse: Response = await fetch(`${Resource.API_ENDPOINT}/v3/monitors`, {
+
+            // Create a new synthetics monitor
+            // https://docs.newrelic.com/docs/apis/synthetics-rest-api/monitor-examples/manage-synthetics-monitors-rest-api#create-monitor
+            const apiKey = model.apiKey;
+            const apiEndpoint = ApiEndpoints[model.endpointRegion as EndpointRegions];
+            const createResponse: Response = await fetch(`${apiEndpoint}/v3/monitors`, {
                 method: 'POST',
-                headers: { ...Resource.DEFAULT_HEADERS, 'Api-Key': model.apiKey },
+                headers: { ...Resource.DEFAULT_HEADERS, 'Api-Key': apiKey },
                 body: JSON.stringify({
                     name: model.name,
                     uri: model.uri,
@@ -123,20 +128,20 @@ class Resource extends BaseResource<ResourceModel> {
                 } as Monitor)
             });
             await this.checkResponse(createResponse, logger, request.logicalResourceIdentifier);
+
+            // Use address from location header to read newly created monitor
+            // https://docs.newrelic.com/docs/apis/synthetics-rest-api/monitor-examples/manage-synthetics-monitors-rest-api#get-specific-monitor
             const locationUrl = createResponse.headers.get('location');
             if (!locationUrl) {
                 throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
             }
-            const apiKey = model.apiKey || this.apiKey;
-
             const response: Response = await fetch(locationUrl, {
                 method: 'GET',
                 headers: { ...Resource.DEFAULT_HEADERS, 'Api-Key': apiKey }
             });
             const monitor: Monitor = await this.checkResponse(response, logger, request.logicalResourceIdentifier);
-            this.apiKey = apiKey;
             model.id = monitor.id;
-            model.apiKey = null;
+            // model.apiKey = null;
 
             // Setting Status to success will signal to CloudFormation that the operation is complete
             progress.status = OperationStatus.Success;
@@ -159,6 +164,7 @@ class Resource extends BaseResource<ResourceModel> {
      * @param request The request object for the provisioning request passed to the implementor
      * @param callbackContext Custom context object to allow the passing through of additional
      * state or metadata between subsequent retries
+     * @param logger Logger to proxy requests to default publishers
      */
     @handlerEvent(Action.Update)
     public async update(
@@ -169,7 +175,7 @@ class Resource extends BaseResource<ResourceModel> {
     ): Promise<ProgressEvent> {
         logger.log('request', request);
         const model = new ResourceModel(request.desiredResourceState);
-        const { id, kind, locations, name, slaThreshold, status } = request.previousResourceState;
+        const { id, name } = request.previousResourceState;
 
         if (!model.id) {
             throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
@@ -183,15 +189,19 @@ class Resource extends BaseResource<ResourceModel> {
         }
 
         try {
-            if (!model.frequency) {
-                model.frequency = Integer(5);
-            }
+            // Set or fallback to default values
+            model.frequency = model.frequency || Integer(5);
+            model.endpointRegion = model.endpointRegion || 'US';
             model.kind = Resource.DEFAULT_MONITOR_KIND;
             model.status = Resource.DEFAULT_MONITOR_STATUS;
             model.locations = Resource.DEFAULT_MONITOR_LOCATIONS;
             model.slaThreshold = Resource.DEFAULT_MONITOR_SLA_THRESHOLD;
-            const apiKey = model.apiKey || this.apiKey;
-            const response: Response = await fetch(`${Resource.API_ENDPOINT}/v3/monitors/${id}`, {
+
+            // Update the synthetics monitor by calling the endpoint with its ID.
+            // https://docs.newrelic.com/docs/apis/synthetics-rest-api/monitor-examples/manage-synthetics-monitors-rest-api#update-monitor
+            const apiKey = model.apiKey;
+            const apiEndpoint = ApiEndpoints[model.endpointRegion as EndpointRegions];
+            const response: Response = await fetch(`${apiEndpoint}/v3/monitors/${id}`, {
                 method: 'PUT',
                 headers: { ...Resource.DEFAULT_HEADERS, 'Api-Key': apiKey },
                 body: JSON.stringify({
@@ -206,6 +216,7 @@ class Resource extends BaseResource<ResourceModel> {
             });
             await this.checkResponse(response, logger, id);
             // model.apiKey = null;
+
             const progress = ProgressEvent.success<ProgressEvent<ResourceModel>>(model);
             logger.log('progress', progress);
             return progress;
@@ -227,6 +238,7 @@ class Resource extends BaseResource<ResourceModel> {
      * @param request The request object for the provisioning request passed to the implementor
      * @param callbackContext Custom context object to allow the passing through of additional
      * state or metadata between subsequent retries
+     * @param logger Logger to proxy requests to default publishers
      */
     @handlerEvent(Action.Delete)
     public async delete(
@@ -242,11 +254,17 @@ class Resource extends BaseResource<ResourceModel> {
         if (!model.id) {
             throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
         }
-        const response: Response = await fetch(`${Resource.API_ENDPOINT}/v3/monitors/${model.id}`, {
+
+        // Remove the synthetics monitor by calling the delete endpoint with its ID.
+        // https://docs.newrelic.com/docs/apis/synthetics-rest-api/monitor-examples/manage-synthetics-monitors-rest-api#delete-monitor
+        model.endpointRegion = model.endpointRegion || 'US';
+        const apiEndpoint = ApiEndpoints[model.endpointRegion as EndpointRegions];
+        const response: Response = await fetch(`${apiEndpoint}/v3/monitors/${model.id}`, {
             method: 'DELETE',
             headers: { ...Resource.DEFAULT_HEADERS, 'Api-Key': model.apiKey }
         });
         await this.checkResponse(response, logger, model.id);
+
         const progress = ProgressEvent.success<ProgressEvent<ResourceModel>>();
         logger.log('progress', progress);
         return progress;
@@ -260,6 +278,7 @@ class Resource extends BaseResource<ResourceModel> {
      * @param request The request object for the provisioning request passed to the implementor
      * @param callbackContext Custom context object to allow the passing through of additional
      * state or metadata between subsequent retries
+     * @param logger Logger to proxy requests to default publishers
      */
     @handlerEvent(Action.Read)
     public async read(
