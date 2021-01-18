@@ -8,9 +8,11 @@
     "request": {
         "clientRequestToken": "4b90a7e4-b790-456b-a937-0cfdfa211dfe",
         "desiredResourceState": {
-            "ApiKey": "YOUR_API_KEY_HERE",
+            "ApiKey": "<MY_API_KEY_HERE>",
+            "EndpointRegion": "<MY_REGION_HERE>",
             "Name": "MyWebsiteMonitor",
-            "Uri": "https://aws.amazon.com"
+            "Uri": "https://aws.amazon.com",
+            "Frequency": 10
         },
         "previousResourceState": null,
         "logicalResourceIdentifier": "MyResource"

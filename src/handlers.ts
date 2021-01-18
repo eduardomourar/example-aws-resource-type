@@ -58,6 +58,8 @@ class Resource extends BaseResource<ResourceModel> {
     private async checkResponse(response: Response, logger: LoggerProxy, uid?: string): Promise<any> {
         if (response.status === 400) {
             throw new exceptions.AlreadyExists(this.typeName, uid);
+        } else if (response.status === 401) {
+            throw new exceptions.AccessDenied(response.statusText);
         } else if (response.status === 404) {
             throw new exceptions.NotFound(this.typeName, uid);
         } else if (response.status > 400) {

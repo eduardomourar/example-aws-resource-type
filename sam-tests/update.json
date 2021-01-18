@@ -8,18 +8,20 @@
     "request": {
         "clientRequestToken": "4b90a7e4-b790-456b-a937-0cfdfa211dfe",
         "desiredResourceState": {
-            "Id": "YOUR_RESOURCE_ID_HERE",
-            "ApiKey": "YOUR_API_KEY_HERE",
-            "Name": "MyWebsiteMonitor",
-            "Uri": "https://aws.amazon.com",
-            "Frequency": 10
-        },
-        "previousResourceState": {
-            "Id": "YOUR_RESOURCE_ID_HERE",
-            "ApiKey": "YOUR_API_KEY_HERE",
+            "Id": "<MY_RESOURCE_ID_HERE>",
+            "ApiKey": "<MY_API_KEY_HERE>",
+            "EndpointRegion": "<MY_REGION_HERE>",
             "Name": "MyWebsiteMonitor",
             "Uri": "https://aws.amazon.com",
             "Frequency": 30
+        },
+        "previousResourceState": {
+            "Id": "<MY_RESOURCE_ID_HERE>",
+            "ApiKey": "<MY_API_KEY_HERE>",
+            "EndpointRegion": "<MY_REGION_HERE>",
+            "Name": "MyWebsiteMonitor",
+            "Uri": "https://aws.amazon.com",
+            "Frequency": 10
         },
         "logicalResourceIdentifier": "MyResource"
     },
