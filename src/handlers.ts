@@ -309,6 +309,8 @@ class Resource extends BaseResource<ResourceModel> {
 
 export const resource = new Resource(ResourceModel.TYPE_NAME, ResourceModel);
 
+// Entrypoint for production usage after registered in CloudFormation
 export const entrypoint = resource.entrypoint;
 
+// Entrypoint used for local testing purpose
 export const testEntrypoint = resource.testEntrypoint;
