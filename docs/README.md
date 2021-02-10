@@ -12,9 +12,11 @@ To declare this entity in your AWS CloudFormation template, use the following sy
 {
     "Type" : "Example::Monitoring::Website",
     "Properties" : {
+        "<a href="#apikey" title="ApiKey">ApiKey</a>" : <i>String</i>,
+        "<a href="#endpointregion" title="EndpointRegion">EndpointRegion</a>" : <i>String</i>,
         "<a href="#name" title="Name">Name</a>" : <i>String</i>,
-        "<a href="#websiteurl" title="WebsiteUrl">WebsiteUrl</a>" : <i>String</i>,
-        "<a href="#pinginterval" title="PingInterval">PingInterval</a>" : <i>Double</i>,
+        "<a href="#uri" title="Uri">Uri</a>" : <i>String</i>,
+        "<a href="#frequency" title="Frequency">Frequency</a>" : <i>Integer</i>,
     }
 }
 </pre>
@@ -24,16 +26,42 @@ To declare this entity in your AWS CloudFormation template, use the following sy
 <pre>
 Type: Example::Monitoring::Website
 Properties:
+    <a href="#apikey" title="ApiKey">ApiKey</a>: <i>String</i>
+    <a href="#endpointregion" title="EndpointRegion">EndpointRegion</a>: <i>String</i>
     <a href="#name" title="Name">Name</a>: <i>String</i>
-    <a href="#websiteurl" title="WebsiteUrl">WebsiteUrl</a>: <i>String</i>
-    <a href="#pinginterval" title="PingInterval">PingInterval</a>: <i>Double</i>
+    <a href="#uri" title="Uri">Uri</a>: <i>String</i>
+    <a href="#frequency" title="Frequency">Frequency</a>: <i>Integer</i>
 </pre>
 
 ## Properties
 
+#### ApiKey
+
+API Key that allows using the REST API on the monitors of an account.
+
+_Required_: Yes
+
+_Type_: String
+
+_Minimum_: <code>1</code>
+
+_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
+
+#### EndpointRegion
+
+The region from the account, which will influence the endpoint to be called: https://synthetics.newrelic.com/synthetics/api (US - default) or https://synthetics.eu.newrelic.com/synthetics/api (EU).
+
+_Required_: No
+
+_Type_: String
+
+_Allowed Values_: <code>US</code> | <code>EU</code>
+
+_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
+
 #### Name
 
-The name of your website monitor.
+The friendly name of the website monitor.
 
 _Required_: Yes
 
@@ -45,9 +73,9 @@ _Maximum_: <code>50</code>
 
 _Update requires_: [Replacement](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-replacement)
 
-#### WebsiteUrl
+#### Uri
 
-The URL of your website that will be monitored.
+The URI of your website that will be monitored.
 
 _Required_: Yes
 
@@ -57,13 +85,15 @@ _Pattern_: <code>^https?://[^\s/$.?#].[^\s]*$</code>
 
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
 
-#### PingInterval
+#### Frequency
 
-Ping interval to monitor in minutes
+The frequency interval for the monitoring check (in minutes). Default is 5 minutes.
 
 _Required_: No
 
-_Type_: Double
+_Type_: Integer
+
+_Allowed Values_: <code>1</code> | <code>5</code> | <code>10</code> | <code>15</code> | <code>30</code> | <code>60</code> | <code>360</code> | <code>720</code> | <code>1440</code>
 
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
 
@@ -71,7 +101,7 @@ _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormati
 
 ### Ref
 
-When you pass the logical ID of this resource to the intrinsic `Ref` function, Ref returns the Name.
+When you pass the logical ID of this resource to the intrinsic `Ref` function, Ref returns the Id.
 
 ### Fn::GetAtt
 
@@ -79,7 +109,23 @@ The `Fn::GetAtt` intrinsic function returns a value for a specified attribute of
 
 For more information about using the `Fn::GetAtt` intrinsic function, see [Fn::GetAtt](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-getatt.html).
 
-#### MonitoringPage
+#### Id
 
-The status page for your website monitoring.
+The ID of the website monitor.
+
+#### Kind
+
+The type of the website monitor. Default is SIMPLE (ping).
+
+#### Locations
+
+The locations from where your website will be checked. Default to AWS_EU_CENTRAL_1 and AWS_US_WEST_1.
+
+#### Status
+
+The status of your website monitoring. Default is MUTED.
+
+#### SlaThreshold
+
+The SLA threshold for the monitoring check (in seconds). Default is 7 seconds.
 
